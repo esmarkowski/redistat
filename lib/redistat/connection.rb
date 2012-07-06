@@ -23,18 +23,19 @@ module Redistat
         ref ||= :default
         synchronize do
           check_redis_version(conn)
-          references[ref] = conn.client.id
-          connections[conn.client.id] = conn
+          references[ref] = safe_connection_id(conn)
+          connections[safe_connection_id(conn)] = conn
         end
       end
 
       def create(options = {})
         synchronize do
+          check_distributed_config( options ) 
           options = options.clone
           ref = options.delete(:ref) || :default
-          options.reverse_merge!(default_options)
+          options.reverse_merge!(default_options) unless distributed?
           conn = (connections[connection_id(options)] ||= connection(options))
-          references[ref] = conn.client.id
+          references[ref] = safe_connection_id( conn )
           conn
         end
       end
@@ -58,12 +59,31 @@ module Redistat
       end
 
       def connection(options)
-        check_redis_version(Redis.new(options))
+        check_redis_version single_or_distributed(options)
       end
 
       def connection_id(options = {})
+        return safe_connection_id if distributed?
         options = options.reverse_merge(default_options)
         "redis://#{options[:host]}:#{options[:port]}/#{options[:db]}"
+      end
+      
+      def safe_connection_id(conn)
+        return :distributed if distributed?
+        conn.client.id
+      end
+      
+      def single_or_distributed(options)
+        return Redis::Distributed.new(options) if distributed?
+        Redis.new( options )
+      end
+      
+      def check_distributed_config(options)
+        @distributed = options.is_a? Array
+      end
+      
+      def distributed?
+        @distributed
       end
 
       def check_redis_version(conn)

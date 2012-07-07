@@ -68,7 +68,7 @@ module Redistat
         "redis://#{options[:host]}:#{options[:port]}/#{options[:db]}"
       end
       
-      def safe_connection_id(conn)
+      def safe_connection_id(conn = nil)
         return :distributed if distributed?
         conn.client.id
       end

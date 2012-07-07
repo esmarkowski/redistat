@@ -91,8 +91,10 @@ module Redistat
       end
 
       def check_redis_version(conn)
-        raise RedisServerIsTooOld if conn.info["redis_version"] < REQUIRED_SERVER_VERSION
-        if conn.info["redis_version"] < MIN_EXPIRE_SERVER_VERSION
+        redis_version = conn.info["redis_version"]
+        redis_version = conn.collect{|inf| inf["redis_version"]}.min if distributed?
+        raise RedisServerIsTooOld if redis_version < REQUIRED_SERVER_VERSION
+        if redis_version < MIN_EXPIRE_SERVER_VERSION
           STDOUT.puts "WARNING: You MUST upgrade Redis to v2.1.3 or later " +
             "if you are using key expiry."
         end

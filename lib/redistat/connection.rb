@@ -65,7 +65,7 @@ module Redistat
       def connection_id(options = {})
         return safe_connection_id if distributed?
         options = options.reverse_merge(default_options)
-        "redis://#{options[:host]}:#{options[:port]}/#{options[:db]}"
+        redis_url( options )
       end
       
       def safe_connection_id(conn = nil)
@@ -74,8 +74,12 @@ module Redistat
       end
       
       def single_or_distributed(options)
-        return Redis::Distributed.new(options) if distributed?
+        return Redis::Distributed.new(options.collect{|node| redis_url( node )}) if distributed?
         Redis.new( options )
+      end
+      
+      def redis_url( options )
+        "redis://#{options[:host]}:#{options[:port]}/#{options[:db]}"
       end
       
       def check_distributed_config(options)

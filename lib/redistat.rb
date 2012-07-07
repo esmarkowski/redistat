@@ -1,4 +1,3 @@
-
 require 'rubygems'
 require 'date'
 require 'time'
@@ -14,6 +13,7 @@ end
 
 require 'time_ext'
 require 'redis'
+require 'redis/distributed'
 require 'json'
 
 require 'redistat/mixins/options'

@@ -4,7 +4,11 @@ include Redistat
 describe Redistat::Connection do
 
   before(:each) do
-    @redis = Redistat.redis
+    @redis = Redistat.connect(:port => 8379, :db => 15, :thread_safe => true)
+  end
+
+  after(:each) do 
+    Redistat::Connection.close(:default)
   end
 
   it "should have a valid Redis client instance" do
@@ -49,6 +53,9 @@ describe Redistat::Connection do
     Redistat.redis.client.db.should == 15
     Redistat.connect(:port => 8379, :db => 14)
     Redistat.redis.client.db.should == 14
+
+    #this was getting set in the previous test and hanging around
+    Redistat.connect(:port => 8379, :db => 14, :ref => "Custom")
 
     Redistat.redis("Custom").client.db.should == 14
     Redistat.connect(:port => 8379, :db => 15, :ref => "Custom")

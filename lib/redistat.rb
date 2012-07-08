@@ -49,6 +49,7 @@ module Redistat
 
   class InvalidOptions < ArgumentError; end
   class RedisServerIsTooOld < Exception; end
+  class RedisDistributedClientIsTooOld < Exception; end
 
   class << self
 

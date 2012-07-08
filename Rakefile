@@ -28,10 +28,14 @@ REDIS_DIR = File.expand_path(File.join("..", "spec"), __FILE__)
 REDIS_CNF = File.join(REDIS_DIR, "redis-test.conf")
 REDIS_PID = File.join(REDIS_DIR, "db", "redis.pid")
 
+REDIS_DIST_CNF = File.join( REDIS_DIR, "redis-dist-test.conf")
+REDIS_DIST_PID = File.join(REDIS_DIR, "db", "redis-dist.pid")
+
 desc "Start the Redis test server"
 task :start do
   unless File.exists?(REDIS_PID)
     system "redis-server #{REDIS_CNF}"
+    puts system "redis-server #{REDIS_DIST_CNF}"
   end
 end
 
@@ -40,6 +44,8 @@ task :stop do
   if File.exists?(REDIS_PID)
     system "kill #{File.read(REDIS_PID)}"
     system "rm #{REDIS_PID}"
+    system "kill #{File.read(REDIS_DIST_PID)}"
+    system "rm #{REDIS_DIST_PID}"
   end
 end
 
